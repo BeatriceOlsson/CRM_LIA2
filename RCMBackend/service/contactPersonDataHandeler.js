@@ -51,7 +51,7 @@ async function fetchUserEmail(email) {
 
 async function fetchUserInformation(email) {
     if(!email) return;
-console.log('df');
+
     try {
         const db = await DBConetion;
 
@@ -59,11 +59,25 @@ console.log('df');
         .input('email', sql.VarChar(50), email)
         .query(`SELECT firstName, lastName, email, password, companyID
                 FROM contactPerson WHERE email = @email`)
-console.log('sda', userInformation);
+
         return userInformation.recordset || [];
     } catch (error) {
         
     }
 }
 
-export {savingNewPerson, fetchUserEmail, fetchUserInformation};
+async function getAllUsers() {
+
+    try {
+        const db = await DBConetion;
+        const allUsers = await db.request()
+        .query(`SELECT cp.contactPersonID, cp.firstName, cp.lastName, cp.email, c.companyName
+                FROM contactPerson cp LEFT JOIN company c ON cp.companyID = c.companyID;`)
+
+        return allUsers.recordset;
+    } catch (error) {
+        
+    }
+}
+
+export {savingNewPerson, fetchUserEmail, fetchUserInformation, getAllUsers};

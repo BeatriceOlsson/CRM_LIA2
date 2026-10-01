@@ -31,7 +31,7 @@ function verifyToken(req, res, next) {
 
     try {
         const verify = jwt.verify(token, secretKey);
-        console.log(verify);
+
         req.user = verify;
         next();
     } catch (error) {

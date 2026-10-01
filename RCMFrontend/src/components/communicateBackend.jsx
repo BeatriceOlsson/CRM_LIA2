@@ -13,12 +13,18 @@ async function CommunicateBackend({ url, crud, body }) {
     if (crud !== "GET" && body) {
       dataToBackend.body = JSON.stringify(body);
     }
-    console.log(dataToBackend);
+
     const respons = await fetch(`${backendURL}${url}`, dataToBackend);
     const data = await respons.json();
 
     if (!respons.ok) {
       throw new Error(data.message || "Okänt fel uppstog");
+    }
+
+    //Reagerar på status 401 som JWT skickar när token ej fins
+    if (respons.status === 401) {
+      window.dispatchEvent(new CustomEvent("session-expired"));
+      throw new Error("Session Expired");
     }
 
     return data;

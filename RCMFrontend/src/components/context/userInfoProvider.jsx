@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserInfoContext } from "./userInfoContext";
 import CommunicateBackend from "../communicateBackend";
 
@@ -11,19 +11,19 @@ export function UserInfoProvider({ children }) {
     company: "",
   });
 
-  const statusLoggedOut = async () => {
+  const statusLoggedOut = useCallback(async () => {
     setIsLoggedIn(false);
     setUserInformation({ firstName: "", lastName: "", company: "" });
 
     try {
       await CommunicateBackend({
-        url: "/user/logOut",
+        url: "/contactPerson/logOut",
         crud: "POST",
       });
     } catch (error) {
       console.log(error);
     }
-  };
+  }, []);
 
   const statusLoggedIn = () => {
     setIsLoggedIn(true);
@@ -42,10 +42,10 @@ export function UserInfoProvider({ children }) {
     setLoading(true);
     try {
       const token = await CommunicateBackend({
-        url: "/user/validate",
+        url: "/contactPerson/validate",
         crud: "GET",
       });
-      console.log("token", token.user, token.length);
+
       if (token instanceof Error) {
         setIsLoggedIn(false);
         return;
@@ -71,6 +71,15 @@ export function UserInfoProvider({ children }) {
   useEffect(() => {
     verifyToken();
   }, []);
+
+  useEffect(() => {
+    const handelExpier = () => {
+      statusLoggedOut();
+    };
+
+    window.addEventListener("session-expired", handelExpier);
+    return () => window.removeEventListener("session-expired", handelExpier);
+  }, [statusLoggedOut]);
 
   const data = {
     placeUserInfo,

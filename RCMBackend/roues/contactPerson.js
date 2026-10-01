@@ -1,11 +1,22 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
-import { fetchUserEmail, savingNewPerson, fetchUserInformation } from '../service/userLoginHandeler.js';
+import { fetchUserEmail, savingNewPerson, fetchUserInformation, getAllUsers } from '../service/contactPersonDataHandeler.js';
 import logger from '../middleware/logger.middelware.js';
 import { clearToken, createToken, verifyToken } from '../middleware/jwt.middelware.js';
-import { companyIdDB, companyNameDB } from '../service/companyDatahandeler.js';
+import { companyIdDB, companyNameDB } from '../service/companyDataHandeler.js';
 
 const routes = express.Router();
+
+routes.get('/contactPerson', verifyToken, async (req, res) => {
+
+    try {
+        const response = await getAllUsers(); 
+
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(400).json({ message: "Kunde inte hämta personer", error});
+    }
+})
 
 routes.post('/login', async (req, res) => {
     if(!req.body) {
@@ -16,24 +27,24 @@ routes.post('/login', async (req, res) => {
     if (!email || !password) {
         return res.status(400).json({message: 'Email och lösenord krävs.'});
     }
-console.log('1', email, password);
+
     try {
         const userInformation = await fetchUserInformation(email.trim());
         const DBpassword = userInformation[0]?.password;
-console.log('2', userInformation);
+
         const isMatch = await bcrypt.compare(password, DBpassword);
-console.log('2.5');
+
         if(!isMatch) {
-            return res.status(401).json({message: 'Fel email eller lösenord.'});
+            return res.status(400).json({message: 'Fel email eller lösenord.'});
         }
-console.log('3');
+
         const {firstName, lastName, companyID} = userInformation[0];
 
         const companyResult = await companyNameDB(companyID);
         const companyName = companyResult[0]?.companyName;
-console.log('4');
+
         createToken(firstName, lastName, email, companyName, res);
-console.log('5');
+
         return res.status(200).json({
             message: 'Inloggning lyckades.',
             user: { firstName, lastName, company: companyName }
