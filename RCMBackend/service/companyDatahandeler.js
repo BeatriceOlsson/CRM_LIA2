@@ -4,7 +4,7 @@ import logger from "../middleware/logger.middelware.js";
 
 const DBConetion = connectToDB();
 
-async function saveCompanyInDb( companyName ) {
+async function saveCompanyInDb( companyName, orgNr, adress ) {
     if(!companyName) return;
 
     try {
@@ -12,8 +12,10 @@ async function saveCompanyInDb( companyName ) {
 
         await db.request()
         .input('companyName', sql.VarChar(100), companyName)
-        .query(`INSERT INTO company (companyName)
-                VALUES (@companyName)`)
+        .input('orgNr', sql.Int, orgNr)
+        .input('adress', sql.VarChar(225), adress)
+        .query(`INSERT INTO company (companyName, orgNr, adress)
+                VALUES (@companyName, @orgNr, @adress)`)
 
         return true;
     } catch (error) {
@@ -23,7 +25,7 @@ async function saveCompanyInDb( companyName ) {
 
 async function companyIdDB( companyName ) {
     if(!companyName) return;
-console.log('anrop om id');
+
     try {
         const db = await DBConetion;
 
@@ -57,15 +59,30 @@ async function companyNameDB( companyId ) {
 
 async function allCompanyName(){
     try{
-        console.log('Inann anrop');
+
         const db = await DBConetion;
         const companyData = await db.request()
         .query(`SELECT companyName FROM company`)
-console.log('efter anrop', companyData);
+
         return companyData.recordset || [];
     }catch (error) {
         res.status(500).json({message: 'Kunde inte hämta företag.'});
     }
 }
 
-export { saveCompanyInDb, companyIdDB, allCompanyName, companyNameDB }
+async function companyData() {
+
+    try {
+        const db = await DBConetion;
+        const response = await db.request()
+        .query(`SELECT companyID, companyName, orgNr, adress
+                FROM company`);
+
+                return response.recordset || [];
+    } catch (error) {
+        res.status(400).json({ message: 'Kunde inte hämta alla företag.'})
+    }
+}
+
+
+export { saveCompanyInDb, companyIdDB, allCompanyName, companyNameDB, companyData }

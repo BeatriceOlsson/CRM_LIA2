@@ -3,8 +3,10 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-import userRouter from './roues/user.js';
+import contactPersonRouter from './roues/contactPerson.js';
 import companyRouter from './roues/company.js';
+import salesRouter from './roues/sales.js';
+import usersRouter from './roues/users.js';
 
 dotenv.config();
 
@@ -20,8 +22,10 @@ app.use(
 
 app.use(cookieParser());
 //console.log('Anrop i server');
-app.use('/user', userRouter);
+app.use('/contactPerson', contactPersonRouter);
 app.use('/company', companyRouter);
+app.use('/sales', salesRouter);
+app.use('/users', usersRouter);
 
 
 const port = process.env.PORT || 3000;
