@@ -7,6 +7,7 @@ import contactPersonRouter from './roues/contactPerson.js';
 import companyRouter from './roues/company.js';
 import salesRouter from './roues/sales.js';
 import usersRouter from './roues/users.js';
+import filterRouter from './roues/filter.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use('/contactPerson', contactPersonRouter);
 app.use('/company', companyRouter);
 app.use('/sales', salesRouter);
 app.use('/users', usersRouter);
+app.use('/filter', filterRouter)
 
 
 const port = process.env.PORT || 3000;
