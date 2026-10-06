@@ -1,2 +1,3 @@
 .env
-logger
+combined.log
+error.log
