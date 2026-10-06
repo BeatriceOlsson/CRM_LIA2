@@ -127,12 +127,17 @@ function RegisterSails({ isOpen, onClose }) {
           <div className="relative">
             <form
               onSubmit={regesterSales}
-              className="flex flex-col items-center gap-3 mb-10"
+              className="flex flex-col items-center gap-2 mb-10"
             >
               <InputFieldComponent
                 type={"number"}
                 name={"salesValue"}
                 placeholder={"Summa (SKR)"}
+              />
+              <InputFieldComponent
+                type={"text"}
+                name={"title"}
+                placeholder={"Försäljnings titel"}
               />
               <select
                 name="salesStatus"

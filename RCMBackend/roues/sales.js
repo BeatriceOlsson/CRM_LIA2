@@ -16,7 +16,7 @@ routes.get('/sales', verifyToken, async (req,res) => {
 })
 
 routes.post('/registerSales', verifyToken, async (req, res) => {
-    let {salesValue, salesStatus, companyID, contactPersonID, userID} = req.body;
+    let {salesValue, title, salesStatus, companyID, contactPersonID, userID} = req.body;
 
     salesValue = salesValue ? Number(salesValue) : null;
     companyID = companyID ? Number(companyID) : null;
@@ -27,7 +27,7 @@ if (!companyID || !contactPersonID || !userID) {
     return res.status(400).json({ message: 'Saknas data för att kunna registrera försäljningen.'})
 }
     try {
-        const saveSale = await saveASales(salesValue, salesStatus, companyID, contactPersonID, userID);
+        const saveSale = await saveASales(salesValue, title, salesStatus, companyID, contactPersonID, userID);
 
         return res.status(200).json({message: 'Försäljningen har sparats.', saveSale})
     } catch (error) {

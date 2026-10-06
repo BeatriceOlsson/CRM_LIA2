@@ -22,11 +22,25 @@ export function TablesComponent({ dataType, dataArray }) {
       }));
       break;
     case "sales":
-      headers = ["Kosnad", "Status", "Företag", "Motagare", "Ägare"];
+      headers = [
+        "Titel",
+        "Inteckt",
+        "Kosnad",
+        "Skillnaden",
+        "Prosent",
+        "Status",
+        "Företag",
+        "Motagare",
+        "Ägare",
+      ];
       formData = dataArray.map((sales) => ({
         id: sales.salesID,
         cells: [
+          sales.title,
           sales.salesValue,
+          sales.purcheseValue,
+          sales.differenceValue,
+          sales.percentageDifferense,
           sales.salesStatus,
           sales.companyName,
           `${sales.CPFirstName} ${sales.CPLastName}`,
