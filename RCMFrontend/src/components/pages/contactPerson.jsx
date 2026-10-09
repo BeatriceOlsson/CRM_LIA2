@@ -18,7 +18,7 @@ function ContactPerson() {
     salesStatus: [],
     companyID: "",
     contactPersonID: "",
-    usersID: "",
+    userID: "",
   });
 
   useEffect(() => {

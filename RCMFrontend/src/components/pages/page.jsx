@@ -1,7 +1,11 @@
+import { UserFilterTabel } from "../listComponent/userFilterdTabel";
+
 function Page() {
   return (
     <div>
-      <div></div>
+      <div>
+        <UserFilterTabel />
+      </div>
       <div></div>
     </div>
   );

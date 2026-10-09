@@ -7,21 +7,28 @@ import { ProtectedRoutes } from "./components/pages/protectedRouter";
 import Companies from "./components/pages/companies";
 import ContactPerson from "./components/pages/contactPerson";
 import Sales from "./components/pages/sales";
+import Profile from "./components/pages/profile";
+import Update from "./components/pages/update";
+import { DeleteProvider } from "./components/context/useDeleteProvider";
 
 function App() {
   return (
     <UserInfoProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/Login" element={<Login />} />
-          <Route element={<ProtectedRoutes />}>
-            <Route path="/" element={<Page />} />
-            <Route path="/companies" element={<Companies />} />
-            <Route path="/contactPerson" element={<ContactPerson />} />
-            <Route path="/sales" element={<Sales />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <DeleteProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/Login" element={<Login />} />
+            <Route element={<ProtectedRoutes />}>
+              <Route path="/" element={<Page />} />
+              <Route path="/companies" element={<Companies />} />
+              <Route path="/contactPerson" element={<ContactPerson />} />
+              <Route path="/sales" element={<Sales />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/update/:category/:id" element={<Update />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </DeleteProvider>
     </UserInfoProvider>
   );
 }

@@ -5,16 +5,16 @@ import { filterCompanies, filterPersons, filterSales } from '../service/filterDa
 const routes = express.Router();
 
 routes.post('/filterSales', verifyToken, async (req, res) => {
- let {salesStatus, companyID, contactPersonID, usersID} = req.body;
+ let {salesStatus, companyID, contactPersonID, userID} = req.body;
 
  const status1 = Array.isArray(salesStatus) && salesStatus[0] ? salesStatus[0] : null;
  const status2 = Array.isArray(salesStatus) && salesStatus[1] ? salesStatus[1] : null;
  companyID = companyID ? Number(companyID) : null;
  contactPersonID = contactPersonID ? Number(contactPersonID) : null;
- usersID = usersID ? Number(usersID) : null;
+ userID = userID ? Number(userID) : null;
 
  try {
-     const filterdData = await filterSales (status1, status2, companyID, contactPersonID, usersID);
+     const filterdData = await filterSales (status1, status2, companyID, contactPersonID, userID);
 
      return res.status(200).json(filterdData);
  } catch (error) {

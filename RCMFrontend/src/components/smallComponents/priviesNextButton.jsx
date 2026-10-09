@@ -2,7 +2,7 @@ import { ButtonComponent } from "./buttonComponent";
 
 export function PriviesNextButton({ previus, next, hasPrevius, hasNext }) {
   return (
-    <div className={`flex flex-row justify-between`}>
+    <div className={`flex flex-row justify-center gap-10`}>
       <ButtonComponent
         buttonText={"Föregående"}
         onMouseDown={previus}

@@ -5,9 +5,13 @@ export function SelectedOptionLoop({
   name,
   arrayList,
   className,
+  labelText,
 }) {
   return (
     <div>
+      <div>
+        <label className="text-lg">{labelText}</label>
+      </div>
       <select
         name={name}
         value={value}

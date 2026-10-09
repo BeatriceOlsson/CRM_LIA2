@@ -17,7 +17,7 @@ function Companies() {
     salesStatus: [],
     companyID: "",
     contactPersonID: "",
-    usersID: "",
+    userID: "",
   });
 
   useEffect(() => {

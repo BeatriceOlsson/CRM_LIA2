@@ -3,13 +3,15 @@ import { SelectedOptionLoop } from "../smallComponents/selectedOptionLoop";
 import CommunicateBackend from "../communicateBackend";
 import { SeartchFuntion } from "../smallComponents/seartchFuntion";
 import { ButtonComponent } from "../smallComponents/buttonComponent";
+import { ErrorHandler } from "../smallComponents/errorHandler";
 
 export function FilterComponent({ filterType, filterTitel, filterOn }) {
+  const [errorMessage, setErrorMessage] = useState("");
   const [filterSelected, setFilterSelected] = useState({
     salesStatus: [],
     companyID: "",
     contactPersonID: "",
-    usersID: "",
+    userID: "",
   });
   const [companyList, setCompanyList] = useState([]);
   const [contactList, setContactList] = useState([]);
@@ -29,12 +31,12 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
         });
 
         if (response instanceof Error) {
-          return console.log(Error);
+          return setErrorMessage(response);
         }
 
         setCompanyList(response);
       } catch (error) {
-        return console.log(error);
+        return setErrorMessage(error);
       }
     };
 
@@ -50,12 +52,12 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
         });
 
         if (response instanceof Error) {
-          return console.log(Error);
+          return setErrorMessage(response);
         }
 
         setContactList(response);
       } catch (error) {
-        return console.log(error);
+        return setErrorMessage(error);
       }
     };
 
@@ -71,12 +73,12 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
         });
 
         if (response instanceof Error) {
-          return console.log(Error);
+          return setErrorMessage(response);
         }
 
         setUserList(response);
       } catch (error) {
-        return console.log(error);
+        return setErrorMessage(error);
       }
     };
 
@@ -126,10 +128,6 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
     filterOn?.(filterSelected);
   };
 
-  useEffect(() => {
-    console.log();
-  }, [filterSelected]);
-
   return (
     <div>
       <h2 className="text-xl mt-13">{filterTitel}</h2>
@@ -178,8 +176,8 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
             className={"m-2"}
             titel={"säljare"}
             arrayList={userList}
-            onSelect={(usersID) =>
-              setFilterSelected((prev) => ({ ...prev, usersID }))
+            onSelect={(userID) =>
+              setFilterSelected((prev) => ({ ...prev, userID }))
             }
           />
         )}
@@ -189,6 +187,7 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
         className={"mx-2"}
         buttonClick={SendFilter}
       />
+      {errorMessage && <ErrorHandler error={errorMessage} />}
     </div>
   );
 }

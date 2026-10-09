@@ -18,7 +18,7 @@ function Sales() {
     salesStatus: [],
     companyID: "",
     contactPersonID: "",
-    usersID: "",
+    userID: "",
   });
 
   useEffect(() => {
@@ -33,7 +33,7 @@ function Sales() {
             selectedFilter.salesStatus.length > 0) ||
           selectedFilter.companyID !== "" ||
           selectedFilter.contactPersonID !== "" ||
-          selectedFilter.usersID !== "";
+          selectedFilter.userID !== "";
 
         if (filterData) {
           responsData = await CommunicateBackend({
@@ -99,7 +99,7 @@ function Sales() {
       <div>
         <div className="flex justify-end">
           <ButtonComponent
-            buttonText={"Skicka försäljning"}
+            buttonText={"Skapa försäljning"}
             onMouseDown={regesterSalesOpen}
             className="mx-4"
           />
