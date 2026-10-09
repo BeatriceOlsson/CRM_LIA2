@@ -1,9 +1,9 @@
 import { useUserInfo } from "../hooks/useUserInfo";
 
-export function UsernameShowing() {
+export function UsernameShowing({ className }) {
   const { userInformation } = useUserInfo();
   return (
-    <div>
+    <div className={className}>
       <h2>
         {userInformation.firstName} {userInformation.lastName}
       </h2>

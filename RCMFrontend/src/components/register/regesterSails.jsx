@@ -127,12 +127,17 @@ function RegisterSails({ isOpen, onClose }) {
           <div className="relative">
             <form
               onSubmit={regesterSales}
-              className="flex flex-col items-center gap-2 mb-10"
+              className="flex flex-col items-center gap-1 mb-10"
             >
               <InputFieldComponent
                 type={"number"}
                 name={"salesValue"}
                 placeholder={"Summa (SKR)"}
+              />
+              <InputFieldComponent
+                type={"number"}
+                name={"purcheseValue"}
+                placeholder={"Inköps pris"}
               />
               <InputFieldComponent
                 type={"text"}
@@ -143,14 +148,14 @@ function RegisterSails({ isOpen, onClose }) {
                 name="salesStatus"
                 value={selectedData.salesStatus}
                 onChange={handelChange}
-                className="w-46 border-2 rounded-lg border-teal-400 mb-3"
+                className="w-46 border-2 rounded-lg border-teal-400 mb-1"
               >
                 <option value="">Välj status...</option>
                 <option value={"Draft"}>Utkast</option>
                 <option value={"Sent"}>Skickat</option>
               </select>
               <SelectedOptionLoop
-                className={"mb-3"}
+                className={"mb-1"}
                 name="companyID"
                 text="Välj företag..."
                 value={selectedData.companyID}
@@ -161,7 +166,7 @@ function RegisterSails({ isOpen, onClose }) {
                 }))}
               />
               <SelectedOptionLoop
-                className={"mb-3"}
+                className={"mb-1"}
                 name="contactPersonID"
                 text="Välj motagare..."
                 value={selectedData.contactPersonID}
@@ -172,7 +177,7 @@ function RegisterSails({ isOpen, onClose }) {
                 }))}
               />
               <SelectedOptionLoop
-                className={"mb-3"}
+                className={"mb-1"}
                 name="userID"
                 text="Välj ägare..."
                 value={selectedData.userID}
@@ -193,7 +198,7 @@ function RegisterSails({ isOpen, onClose }) {
                 />
               </div>
             </form>
-            <div className="absolute top-76">
+            <div className="absolute top-70">
               {errorMessage && <ErrorHandler error={errorMessage} />}
             </div>
           </div>

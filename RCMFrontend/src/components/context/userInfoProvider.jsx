@@ -9,11 +9,19 @@ export function UserInfoProvider({ children }) {
     firstName: "",
     lastName: "",
     company: "",
+    contactPersonID: "",
+    userID: "",
   });
 
   const statusLoggedOut = useCallback(async () => {
     setIsLoggedIn(false);
-    setUserInformation({ firstName: "", lastName: "", company: "" });
+    setUserInformation({
+      firstName: "",
+      lastName: "",
+      company: "",
+      contactPersonID: "",
+      userID: "",
+    });
 
     try {
       await CommunicateBackend({
@@ -34,6 +42,8 @@ export function UserInfoProvider({ children }) {
       firstName: user.firstName,
       lastName: user.lastName,
       company: user.company,
+      contactPersonID: user.contactPersonID,
+      userID: user.userID,
     });
     statusLoggedIn();
   };
@@ -64,9 +74,9 @@ export function UserInfoProvider({ children }) {
     }
   };
 
-  /*useEffect(() => {
+  useEffect(() => {
     console.log(userInformation);
-  }, [userInformation]);*/
+  }, [userInformation]);
 
   useEffect(() => {
     verifyToken();

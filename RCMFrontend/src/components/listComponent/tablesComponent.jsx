@@ -1,10 +1,18 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ErrorHandler } from "../smallComponents/errorHandler";
+import { useDelete } from "../hooks/useDelete";
+
 export function TablesComponent({ dataType, dataArray }) {
+  const { deleteHandler } = useDelete();
+  const [errorMessage, setErrorMessage] = useState("");
+
   let headers = [];
   let formData = [];
 
   switch (dataType) {
     case "CP":
-      headers = ["Person", "Email", "Företag"];
+      headers = ["", "Person", "Email", "Företag", "Radera"];
       formData = dataArray.map((person) => ({
         id: person.contactPersonID,
         cells: [
@@ -15,14 +23,27 @@ export function TablesComponent({ dataType, dataArray }) {
       }));
       break;
     case "CL":
-      headers = ["Företag", "Orgenisationsnummer", "Adress"];
+      headers = [
+        "",
+        "Företag",
+        "Orgenisationsnummer",
+        "Adress",
+        "Total värde (SKR)",
+        "Radera",
+      ];
       formData = dataArray.map((company) => ({
-        id: company.comanyID,
-        cells: [company.companyName, company.orgNr, company.adress],
+        id: company.companyID,
+        cells: [
+          company.companyName,
+          company.orgNr,
+          company.adress,
+          company.totalValue,
+        ],
       }));
       break;
     case "sales":
       headers = [
+        "",
         "Titel",
         "Inteckt",
         "Kosnad",
@@ -32,6 +53,7 @@ export function TablesComponent({ dataType, dataArray }) {
         "Företag",
         "Motagare",
         "Ägare",
+        "Radera",
       ];
       formData = dataArray.map((sales) => ({
         id: sales.salesID,
@@ -47,6 +69,7 @@ export function TablesComponent({ dataType, dataArray }) {
           `${sales.salesFirstName} ${sales.salesLastName}`,
         ],
       }));
+      break;
   }
 
   const colors = [
@@ -60,6 +83,12 @@ export function TablesComponent({ dataType, dataArray }) {
     "#DEFF70",
   ];
 
+  const handelDelete = async (id) => {
+    setErrorMessage("");
+    const result = await deleteHandler(dataType, id);
+    setErrorMessage(result.message);
+  };
+
   return (
     <div className="w-full">
       <table className="min-w-full my-2">
@@ -68,7 +97,7 @@ export function TablesComponent({ dataType, dataArray }) {
             {headers.map((header, index) => (
               <th
                 key={index}
-                className="border-x-2 border-x-cyan-400 border-b-2 border-b-cyan-400 py-1 px-2 text-left"
+                className="border-r-2 border-r-cyan-400 border-b-2 border-b-cyan-400 py-1 px-2 text-left"
               >
                 {header}
               </th>
@@ -79,6 +108,28 @@ export function TablesComponent({ dataType, dataArray }) {
         <tbody>
           {formData.map((row, rowIndex) => (
             <tr key={rowIndex}>
+              <td
+                style={{
+                  backgroundColor: colors[rowIndex % colors.length],
+                }}
+              >
+                <Link to={`/update/${dataType}/${row.id}`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-6 m-2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                    />
+                  </svg>
+                </Link>
+              </td>
               {row.cells.map((cellsData, cellsIndex) => (
                 <td
                   key={cellsIndex}
@@ -90,10 +141,33 @@ export function TablesComponent({ dataType, dataArray }) {
                   {cellsData}
                 </td>
               ))}
+              <td
+                style={{
+                  backgroundColor: colors[rowIndex % colors.length],
+                }}
+              >
+                <button onClick={() => handelDelete(row.id)}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    class="size-6 m-2 flex "
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                    />
+                  </svg>
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {errorMessage && <ErrorHandler error={errorMessage} />}
     </div>
   );
 }

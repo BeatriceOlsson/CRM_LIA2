@@ -1,9 +1,10 @@
-import express from 'express'
+import express, { response } from 'express'
 import bcrypt from 'bcrypt'
-import { fetchUserEmail, savingNewPerson, fetchUserInformation, getAllUsers } from '../service/contactPersonDataHandeler.js';
+import { fetchUserEmail, savingNewPerson, fetchUserInformation, getAllUsers, contactOnID, saveOverContact, deletePerson } from '../service/contactPersonDataHandeler.js';
 import logger from '../middleware/logger.middelware.js';
 import { clearToken, createToken, verifyToken } from '../middleware/jwt.middelware.js';
-import { companyIdDB, companyNameDB } from '../service/companyDataHandeler.js';
+import { companyIdDB, companyNameDB } from '../service/companyDatahandeler.js';
+import { getUsersID } from '../service/usersDataHandeler.js';
 
 const routes = express.Router();
 
@@ -38,16 +39,16 @@ routes.post('/login', async (req, res) => {
             return res.status(400).json({message: 'Fel email eller lösenord.'});
         }
 
-        const {firstName, lastName, companyID} = userInformation[0];
+        const {firstName, lastName, companyID, contactPersonID, userID} = userInformation[0];
 
         const companyResult = await companyNameDB(companyID);
         const companyName = companyResult[0]?.companyName;
 
-        createToken(firstName, lastName, email, companyName, res);
+        createToken(firstName, lastName, email, companyName, contactPersonID, userID, res);
 
         return res.status(200).json({
             message: 'Inloggning lyckades.',
-            user: { firstName, lastName, company: companyName }
+            user: { firstName, lastName, company: companyName, contactPersonID, userID }
         });
     } catch (error) {
         logger.error('Fel vid inlog: ', error);
@@ -76,7 +77,7 @@ routes.post('/register', verifyToken, async (req, res) => {
         }
 
         const companyIDArray = await companyIdDB(companyName);
-        if(companyIDArray.length < 0) {
+        if(companyIDArray.length === 0) {
             return res.status(400).json({message: 'Företaget fins innte i systemet.'})
         }
         const companyId = companyIDArray[0]?.companyID;
@@ -96,6 +97,65 @@ routes.get('/validate', verifyToken, async (req, res) => {
 
 routes.post('/logOut', async (req, res) => {
     return clearToken(res, res);
+})
+
+routes.post('/contactOnID', verifyToken, async (req, res) => {
+    const { id } = req.body;
+
+    const contactPersonID = id ? Number(id) : null;
+
+    try {
+        const contacIdData = await contactOnID(contactPersonID);
+
+        res.status(200).json(contacIdData);
+    } catch (error) {
+        res.status(400).json({ message: 'Fel upstog vid hämtning av användare.'})
+    }
+})
+
+routes.put('/update', verifyToken, async (req, res) => {
+    let {firstName, lastName, email, companyID, contactPersonID} = req.body;
+
+    if(!contactPersonID) {
+        return res.status(500).json({ message: 'Måste finnas en användare att uppdatera.'})
+    }
+
+    contactPersonID = contactPersonID ? Number(contactPersonID) : null;
+    firstName = firstName ? firstName : null;
+    lastName = lastName ? lastName : null;
+    email = email ? email: null;
+    companyID = companyID ? Number(companyID) : null;
+
+    try {
+        const save = await saveOverContact(firstName, lastName, email, companyID, contactPersonID);
+
+        res.status(200).json({ message: 'Ändringan updaterades.'})
+    } catch (error) {
+        res.status(400).json({ message: 'Fel uppstog vid uppdatering av person.'})
+    }
+})
+
+routes.post('/delete', verifyToken, async (req, res) => {
+    const { contactPersonID } = req.body;
+console.log('1');
+    if(!contactPersonID) return res.status(400).json({ message: 'Behöver ha vald användare för att kunna radera data.'})
+    
+    const personExist = await contactOnID(contactPersonID);
+console.log(personExist);
+    if(!personExist || personExist === 0) {
+        return res.status(400).json({ message: 'Användare fins inte i systemet.'})
+    }
+console.log('2');
+    const user = await getUsersID(contactPersonID);
+    const userID = user && user.length > 0 ? user[0].userID : null;
+console.log(userID);
+    try {
+        await deletePerson(contactPersonID, userID);
+
+        res.status(200).json({ message: 'Radering av användare är utförd.'})
+    } catch (error) {
+        return res.status(500).json({ message: 'Fel uppstog och användare kunde inte tas bort.'})
+    }
 })
 
 export default routes;

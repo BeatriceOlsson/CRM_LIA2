@@ -5,13 +5,14 @@ dotenv.config();
 
 const secretKey = process.env.JWT_SECRET_KEY;
 
-function createToken( firstName, lastName, email, companyName, res) {
+function createToken( firstName, lastName, email, companyName, contactPersonID, userID,res) {
     const payload = {
         firstName: firstName, 
         lastName: lastName,
         email: email,
         company: companyName,
-
+        contactPersonID: contactPersonID,
+        userID: userID
     }
 
     const token = jwt.sign(payload, secretKey, { expiresIn: '5h'});

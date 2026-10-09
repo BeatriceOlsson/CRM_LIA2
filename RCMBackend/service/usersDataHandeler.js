@@ -37,6 +37,21 @@ async function getUsersID(contactPersonID) {
     }
 }
 
+async function userIDData(userID) {
+    try {
+        const db = await DBConetion;
+        const respons = await db.request()
+        .input('userID', sql.Int, userID)
+        .query(`SELECT userID, contactPersonID
+                FROM users
+                WHERE userID = @userID`)
+
+        return respons.recordset || [];
+    } catch (error) {
+        logger.error('Kunde inet hämmta');
+    }
+}
+
 async function allUserNames() {
     try {
         const db = await DBConetion;
@@ -47,8 +62,37 @@ async function allUserNames() {
                 return response.recordset || [];
     } catch (error) {
         logger.error('Kunde inte hämmta användare: ', error);
+        return [];
+    }
+}
+
+async function deliteUser(userID) {
+    let transaction;
+
+    try {
+        const db = await DBConetion;
+        transaction = new sql.Transaction(db);
+
+        await transaction.begin();
+
+        const request = new sql.Request(transaction);
+        request.input('userID', sql.Int, userID)
+
+
+         await request.query(`UPDATE sales
+                SET userID = NULL
+                WHERE userID = @userID;`)
+
+        await request.query(`DELETE FROM users
+                WHERE userID = @userID`)
+
+        await transaction.commit();
+
+        return { message: 'Angiven användare har blivit raderad.'}
+    } catch (error) {
+        logger.error('Kunde inte radera användare.', error)
     }
 }
 
 
-export {saveSalesUser, getUsersID, allUserNames};
+export {saveSalesUser, getUsersID, allUserNames, deliteUser, userIDData};
