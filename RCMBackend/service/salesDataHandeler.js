@@ -122,4 +122,24 @@ async function deleteSales( salesID ) {
     }
 }
 
-export {getAllSales, saveASales, salesOnID, saveOverSales, deleteSales};
+async function groupSalesCP() {
+    console.log('2');
+    try {
+        const db = await DBConetion;
+        const response = await db.request()
+        .query(`SELECT cp.firstName , cp.lastName, 
+                SUM(s.salesValue) AS totalSales, 
+                SUM(s.purcheseValue) AS totalPurchese,
+                SUM(vs.differenceValue) AS totalDiferense, 
+                SUM(vs.percentageDifferense) AS totalPersentage
+                FROM sales s LEFT JOIN contactPerson cp ON s.contactPersonID = cp.contactPersonID
+                LEFT JOIN v_salesCalculationse vs ON s.salesID = vs.salesID
+                GROUP BY s.contactPersonID, cp.firstName , cp.lastName;`)
+console.log('3', response.recordset);
+                return response.recordset || [];
+    } catch (error) {
+        logger.error('Datta kunde inte hämtas');
+    }
+}
+
+export {getAllSales, saveASales, salesOnID, saveOverSales, deleteSales, groupSalesCP};

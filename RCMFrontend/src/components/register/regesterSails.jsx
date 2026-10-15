@@ -31,6 +31,19 @@ function RegisterSails({ isOpen, onClose }) {
       userID: selectedData.userID,
     };
 
+    if (!selectedData.companyID) {
+      setErrorMessage("Företag saknas för att kunna spara försäljning");
+      return;
+    }
+    if (!selectedData.contactPersonID) {
+      setErrorMessage("Motagare saaknas för att kunna  spara försäljning");
+      return;
+    }
+    if (!selectedData.userID) {
+      setErrorMessage("Ägare saknas för att kunna spara försäljning");
+      return;
+    }
+
     try {
       const response = await CommunicateBackend({
         url: "/sales/registerSales",
@@ -190,7 +203,7 @@ function RegisterSails({ isOpen, onClose }) {
               <div className="flex flex-row gap-3">
                 <ButtonComponent
                   type="submit"
-                  buttonText={"Skicka försäljning"}
+                  buttonText={"Spara försäljning"}
                 />
                 <ButtonComponent
                   buttonText={"Stäng fönstret"}

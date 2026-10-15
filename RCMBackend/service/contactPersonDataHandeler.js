@@ -8,11 +8,11 @@ const saltedRounds = parseInt(process.env.SALTED_NUMBERS, 10) || 10;
 
 async function savingNewPerson( firstName, lastName, email, password, companyId) {
     if(!email || !password) return;
-console.log('1');
+
     try {
         const hashedPassword = await bcrypt.hash(password, saltedRounds);
         const db = await DBConetion;
-;console.log('2');
+
         await db.request()
         .input('firstName', sql.VarChar(50), firstName)
         .input('lastName', sql.VarChar(50), lastName)
@@ -122,35 +122,48 @@ async function saveOverContact (firstName, lastName, email, companyID, contactPe
     }
 }
 
-async function deletePerson(contactPersonID, userID) {
+async function deletePerson(contactPersonID) {
     let transaction;
-console.log(contactPersonID, userID);
+
     try {
         const db = await DBConetion;
         transaction = new sql.Transaction(db);
 
         await transaction.begin();
-         const request = new sql.Request(transaction);
-         request.input('contactPersonID', sql.Int, contactPersonID)
-         request.input('userID', sql.Int, userID)
+        const request = new sql.Request(transaction);
+        request.input('contactPersonID', sql.Int, contactPersonID);
 
         await request.query(`UPDATE sales
-                SET userID = NULL
-                WHERE userID = @userID`)
+            SET userID = NULL
+            WHERE userID IN (
+                SELECT userID
+                FROM users
+                WHERE contactPersonID = @contactPersonID
+            )`);
+
         await request.query(`UPDATE sales
-                SET contactPersonID = NULL
-                WHERE contactPersonID = @contactPersonID`)
+            SET contactPersonID = NULL
+            WHERE contactPersonID = @contactPersonID`);
 
         await request.query(`DELETE FROM users
-                WHERE userID = @userID`)
+            WHERE contactPersonID = @contactPersonID`);
+            
         await request.query(`DELETE FROM contactPerson
-                WHERE contactPersonID = @contactPersonID`)
+            WHERE contactPersonID = @contactPersonID`);
 
         await transaction.commit();
-console.log()
-        return { message: 'Angiven användare har blivit raderad.'}
+
+        return { success: true, message: 'Angiven användare har blivit raderad.' };
     } catch (error) {
-        logger.error('Kunde inte radera användare.', error)
+        if (transaction) {
+            try {
+                await transaction.rollback();
+            } catch (rollbackError) {
+                logger.error('Kunde inte återställa raderingstransaktionen.', rollbackError);
+            }
+        }
+        logger.error('Kunde inte radera användare.', error);
+        throw error;
     }
 }
 

@@ -14,6 +14,12 @@ function RegisterCompany({ isOpen, onClose }) {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
 
+    if (!data.companyName) {
+      return setErrorMessage(
+        "Företagsnamn behövs för att kunna spara företag.",
+      );
+    }
+
     try {
       const response = await CommunicateBackend({
         url: "/company/save",
@@ -26,13 +32,11 @@ function RegisterCompany({ isOpen, onClose }) {
       }
 
       if (onClose) {
-        onClose();
-        e.currentTarget.reset();
         setErrorMessage("");
+        onClose();
       }
 
       setErrorMessage("");
-      e.currentTarget.reset();
     } catch (error) {
       setErrorMessage(error || "Fel uppstog");
     }

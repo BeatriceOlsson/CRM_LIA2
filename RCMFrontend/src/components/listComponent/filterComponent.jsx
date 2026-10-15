@@ -4,6 +4,7 @@ import CommunicateBackend from "../communicateBackend";
 import { SeartchFuntion } from "../smallComponents/seartchFuntion";
 import { ButtonComponent } from "../smallComponents/buttonComponent";
 import { ErrorHandler } from "../smallComponents/errorHandler";
+import { NumberFilterComponent } from "./numberFilterComponent";
 
 export function FilterComponent({ filterType, filterTitel, filterOn }) {
   const [errorMessage, setErrorMessage] = useState("");
@@ -12,6 +13,10 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
     companyID: "",
     contactPersonID: "",
     userID: "",
+    calculation: "",
+    smallestNumber: "",
+    highestNumber: "",
+    filterType: "",
   });
   const [companyList, setCompanyList] = useState([]);
   const [contactList, setContactList] = useState([]);
@@ -21,6 +26,7 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
   let companyName = false;
   let contactPersonName = false;
   let userName = false;
+  let companyAdress = false;
 
   useEffect(() => {
     const loadCompanies = async () => {
@@ -33,7 +39,6 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
         if (response instanceof Error) {
           return setErrorMessage(response);
         }
-
         setCompanyList(response);
       } catch (error) {
         return setErrorMessage(error);
@@ -92,6 +97,7 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
       break;
     case "CL":
       companyName = true;
+      companyAdress = true;
       break;
     case "sales":
       fiterCheckbox = [
@@ -118,10 +124,16 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
     }
   };
 
-  const handelDropDown = (e) => {
-    const { name, value } = e.target;
-
+  const handelDropDown = (name, value) => {
     setFilterSelected((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handelNumberChange = (name, value, filterType) => {
+    setFilterSelected((prev) => ({
+      ...prev,
+      [name]: value,
+      filterType: filterType,
+    }));
   };
 
   const SendFilter = () => {
@@ -154,11 +166,22 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
             name="companyID"
             text="Välj företag..."
             value={filterSelected.companyID}
-            onChange={(e) => handelDropDown(e)}
+            onChange={(e) => handelDropDown("companyID", e.target.value)}
             arrayList={companyList.map((c) => ({
               value: c.companyID,
               label: c.companyName,
             }))}
+          />
+        )}
+        {companyAdress === true && (
+          <SeartchFuntion
+            className={"m-2"}
+            titel={"adress"}
+            arrayList={companyList}
+            seartchFiled={"adress"}
+            onSelect={(companyID) =>
+              setFilterSelected((prev) => ({ ...prev, companyID }))
+            }
           />
         )}
         {contactPersonName === true && (
@@ -180,6 +203,47 @@ export function FilterComponent({ filterType, filterTitel, filterOn }) {
               setFilterSelected((prev) => ({ ...prev, userID }))
             }
           />
+        )}
+        {filterType === "CL" && (
+          <details className="cursor-pointer mb-2 ml-2">
+            <summary>Total värde:</summary>
+            <NumberFilterComponent
+              filterType={"totalValue"}
+              onChange={handelNumberChange}
+            />
+          </details>
+        )}
+        {filterType === "sales" && (
+          <div>
+            <details className="cursor-pointer mb-2 ml-2">
+              <summary>Inteckt</summary>
+              <NumberFilterComponent
+                filterType={"salesValue"}
+                onChange={handelNumberChange}
+              />
+            </details>
+            <details className="cursor-pointer mb-2 ml-2">
+              <summary>Kosnad</summary>
+              <NumberFilterComponent
+                filterType={"purcheseValue"}
+                onChange={handelNumberChange}
+              />
+            </details>
+            <details className="cursor-pointer mb-2 ml-2">
+              <summary>Skilnaden</summary>
+              <NumberFilterComponent
+                filterType={"differenceValue"}
+                onChange={handelNumberChange}
+              />
+            </details>
+            <details className="cursor-pointer mb-2 ml-2">
+              <summary>Prosent</summary>
+              <NumberFilterComponent
+                filterType={"percentageDifferense"}
+                onChange={handelNumberChange}
+              />
+            </details>
+          </div>
         )}
       </div>
       <ButtonComponent

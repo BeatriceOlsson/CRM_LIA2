@@ -14,21 +14,22 @@ import { DeleteProvider } from "./components/context/useDeleteProvider";
 function App() {
   return (
     <UserInfoProvider>
-      <DeleteProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/Login" element={<Login />} />
-            <Route element={<ProtectedRoutes />}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/Login" element={<Login />} />
+
+          <Route element={<ProtectedRoutes />}>
+            <Route element={<DeleteProvider />}>
               <Route path="/" element={<Page />} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/contactPerson" element={<ContactPerson />} />
               <Route path="/sales" element={<Sales />} />
-              <Route path="/profile" element={<Profile />} />
               <Route path="/update/:category/:id" element={<Update />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
-          </Routes>
-        </BrowserRouter>
-      </DeleteProvider>
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </UserInfoProvider>
   );
 }

@@ -14,16 +14,23 @@ function Sales() {
   const [salesList, setSails] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [grupData, setGrupData] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [selectedFilter, setSelectedFilter] = useState({
     salesStatus: [],
     companyID: "",
     contactPersonID: "",
     userID: "",
+    calculation: "",
+    smallestNumber: "",
+    highestNumber: "",
+    filterType: "",
   });
 
   useEffect(() => {
     const getAllSales = async () => {
       setIsLoading(true);
+      setCurrentPage(1);
       setErrorMessage("");
       try {
         let responsData = [];
@@ -33,13 +40,19 @@ function Sales() {
             selectedFilter.salesStatus.length > 0) ||
           selectedFilter.companyID !== "" ||
           selectedFilter.contactPersonID !== "" ||
-          selectedFilter.userID !== "";
+          selectedFilter.userID !== "" ||
+          selectedFilter.filterType !== "";
 
         if (filterData) {
           responsData = await CommunicateBackend({
             url: "/filter/filterSales",
             crud: "POST",
             body: selectedFilter,
+          });
+        } else if (grupData === true) {
+          responsData = await CommunicateBackend({
+            url: "/sales/groupData",
+            crud: "GET",
           });
         } else {
           responsData = await CommunicateBackend({
@@ -64,7 +77,7 @@ function Sales() {
     };
 
     getAllSales();
-  }, [selectedFilter]);
+  }, [selectedFilter, grupData]);
 
   const itemsPerPage = 10;
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -85,6 +98,49 @@ function Sales() {
     setCurrentPage((prev) => prev + 1);
   };
 
+  const handelDelete = (id) => {
+    setSails((prev) =>
+      prev.filter((item) => {
+        return item.salesID !== id;
+      }),
+    );
+  };
+
+  const handelSorting = (key) => {
+    const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
+    const newDirection = isAsc ? "desc" : "asc";
+
+    const sorted = [...salesList].sort((a, b) => {
+      let valA = a[key] ?? "";
+      let valB = b[key] ?? "";
+
+      if (typeof valA === "number") {
+        return newDirection === "asc" ? valA - valB : valB - valA;
+      }
+
+      const compare = String(valA).localeCompare(String(valB), "sv");
+      return newDirection === "asc" ? compare : -compare;
+    });
+
+    setSails(sorted);
+    setSortConfig({ key, direction: newDirection });
+    setCurrentPage(1);
+  };
+
+  const statusOfGrupDatta = () => {
+    setSelectedFilter({
+      salesStatus: [],
+      companyID: "",
+      contactPersonID: "",
+      userID: "",
+      calculation: "",
+      smallestNumber: "",
+      highestNumber: "",
+      filterType: "",
+    });
+    setGrupData(!grupData);
+  };
+
   return (
     <div className="grid grid-cols-[1fr_5fr]">
       <div className="grid columns-1">
@@ -98,6 +154,10 @@ function Sales() {
       </div>
       <div>
         <div className="flex justify-end">
+          <ButtonComponent
+            buttonText={"Gruppera data"}
+            buttonClick={statusOfGrupDatta}
+          />
           <ButtonComponent
             buttonText={"Skapa försäljning"}
             onMouseDown={regesterSalesOpen}
@@ -115,7 +175,13 @@ function Sales() {
             <ErrorHandler error={errorMessage} />
           ) : salesList.length > 0 ? (
             <div>
-              <TablesComponent dataType={"sales"} dataArray={currentSails} />
+              <TablesComponent
+                dataType={"sales"}
+                dataArray={currentSails}
+                onDelete={handelDelete}
+                onSort={handelSorting}
+                sortConfig={sortConfig}
+              />
               <PriviesNextButton
                 previus={handelPrevius}
                 next={handelNext}

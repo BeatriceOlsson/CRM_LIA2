@@ -21,13 +21,14 @@ async function filterSales(status1, status2, companyID, contactPersonID, userID)
                 cp_person.lastName AS CPLastName,
                 cp_sales.firstName AS salesFirstName, 
                 cp_sales.lastName AS salesLastName
-                    FROM sales s INNER JOIN company c ON s.companyID = c.companyID
-                    INNER JOIN contactPerson cp_person ON s.contactPersonID = cp_person.contactPersonID
-                    INNER JOIN users u ON s.userID = u.userID
-                    INNER JOIN contactPerson cp_sales ON u.contactPersonID = cp_sales.contactPersonID
-                    INNER JOIN v_salesCalculationse vs ON s.salesID = vs.salesID
-                        WHERE(@status1 IS NULL OR s.salesStatus = @status1)
-                        AND (@status2 IS NULL OR s.salesStatus = @status2)
+                    FROM sales s LEFT JOIN company c ON s.companyID = c.companyID
+                    LEFT JOIN contactPerson cp_person ON s.contactPersonID = cp_person.contactPersonID
+                    LEFT JOIN users u ON s.userID = u.userID
+                    LEFT JOIN contactPerson cp_sales ON u.contactPersonID = cp_sales.contactPersonID
+                    LEFT JOIN v_salesCalculationse vs ON s.salesID = vs.salesID
+                        WHERE((@status1 IS NULL AND @status2 IS NULL)
+                            OR s.salesStatus = @status1
+                            OR s.salesStatus = @status2)
                         AND (@companyID IS NULL OR s.companyID = @companyID)
                         AND (@contactPersonID IS NULL OR s.contactPersonID = @contactPersonID)
                         AND (@userID IS NULL OR s.userID = @userID);`)
@@ -62,9 +63,9 @@ async function filterCompanies (companyID){
         const db = await DBConetion;
         const response = await db.request()
         .input('companyID', sql.Int, companyID)
-        .query(`SELECT companyID, companyName, orgNr, adress
-                FROM company
-                WHERE (@companyID IS NULL OR companyID = @companyID);`)
+        .query(`SELECT c.companyID, c.companyName, c.orgNr, c.adress, tsosv.totalValue
+                FROM company c INNER JOIN totalSumOfSalesValue tsosv ON c.companyID = tsosv.companyID
+                WHERE (@companyID IS NULL OR c.companyID = @companyID);`)
 
         return response.recordset || [];
     } catch (error) {

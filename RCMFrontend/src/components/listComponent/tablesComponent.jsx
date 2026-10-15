@@ -3,7 +3,13 @@ import { Link } from "react-router-dom";
 import { ErrorHandler } from "../smallComponents/errorHandler";
 import { useDelete } from "../hooks/useDelete";
 
-export function TablesComponent({ dataType, dataArray }) {
+export function TablesComponent({
+  dataType,
+  dataArray,
+  onDelete,
+  onSort,
+  sortConfig = {},
+}) {
   const { deleteHandler } = useDelete();
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -12,7 +18,13 @@ export function TablesComponent({ dataType, dataArray }) {
 
   switch (dataType) {
     case "CP":
-      headers = ["", "Person", "Email", "Företag", "Radera"];
+      headers = [
+        { label: "", sortKey: null },
+        { label: "Person", sortKey: "firstName" },
+        { label: "Email", sortKey: "email" },
+        { label: "Företag", sortKey: "companyName" },
+        { label: "Radera", sortKey: null },
+      ];
       formData = dataArray.map((person) => ({
         id: person.contactPersonID,
         cells: [
@@ -24,12 +36,12 @@ export function TablesComponent({ dataType, dataArray }) {
       break;
     case "CL":
       headers = [
-        "",
-        "Företag",
-        "Orgenisationsnummer",
-        "Adress",
-        "Total värde (SKR)",
-        "Radera",
+        { label: "", sortKey: null },
+        { label: "Företag", sortKey: "companyName" },
+        { label: "Orgenisationsnummer", sortKey: "orgNr" },
+        { label: "Adress", sortKey: "adress" },
+        { label: "Total värde (SKR)", sortKey: "totalValue" },
+        { label: "Radera", sortKey: null },
       ];
       formData = dataArray.map((company) => ({
         id: company.companyID,
@@ -43,30 +55,30 @@ export function TablesComponent({ dataType, dataArray }) {
       break;
     case "sales":
       headers = [
-        "",
-        "Titel",
-        "Inteckt",
-        "Kosnad",
-        "Skillnaden",
-        "Prosent",
-        "Status",
-        "Företag",
-        "Motagare",
-        "Ägare",
-        "Radera",
+        { label: "", sortKey: null },
+        { label: "Motagare", sortKey: "CPFirstName" },
+        { label: "Titel", sortKey: "title" },
+        { label: "Inteckt", sortKey: "salesValue" },
+        { label: "Kosnad", sortKey: "purcheseValue" },
+        { label: "Skillnaden", sortKey: "differenceValue" },
+        { label: "Prosent", sortKey: "percentageDifferense" },
+        { label: "Status", sortKey: "salesStatus" },
+        { label: "Företag", sortKey: "companyName" },
+        { label: "Ägare", sortKey: "salesFirstName" },
+        { label: "Radera", sortKey: null },
       ];
       formData = dataArray.map((sales) => ({
         id: sales.salesID,
         cells: [
-          sales.title,
-          sales.salesValue,
-          sales.purcheseValue,
-          sales.differenceValue,
-          sales.percentageDifferense,
-          sales.salesStatus,
-          sales.companyName,
-          `${sales.CPFirstName} ${sales.CPLastName}`,
-          `${sales.salesFirstName} ${sales.salesLastName}`,
+          `${sales.CPFirstName ?? sales.firstName} ${sales.CPLastName ?? sales.lastName}`,
+          sales.title ?? null,
+          sales.salesValue ?? sales.totalSales,
+          sales.purcheseValue ?? sales.totalPurchese,
+          sales.differenceValue ?? sales.totalDiferense,
+          sales.percentageDifferense ?? sales.totalPersentage,
+          sales.salesStatus ?? null,
+          sales.companyName ?? null,
+          `${sales.salesFirstName ?? ""} ${sales.salesLastName ?? ""}`,
         ],
       }));
       break;
@@ -86,8 +98,39 @@ export function TablesComponent({ dataType, dataArray }) {
   const handelDelete = async (id) => {
     setErrorMessage("");
     const result = await deleteHandler(dataType, id);
+    if (result.status === "failed") {
+      return setErrorMessage(result.message);
+    }
+    onDelete(id);
     setErrorMessage(result.message);
+    return;
   };
+
+  let headerList = [];
+  const cellsList = [];
+
+  if (dataType === "sales" && formData.length > 0) {
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i];
+      const cellsIndex = i - 1;
+
+      const hasData = formData.some((row) => {
+        const val = row.cells[cellsIndex];
+        return val !== null && val !== " ";
+      });
+
+      if (hasData) {
+        headerList.push(header);
+        cellsList.push(cellsIndex);
+      }
+    }
+    headers = headerList;
+
+    formData = formData.map((row) => ({
+      ...row,
+      cells: row.cells.filter((_, index) => cellsList.includes(index)),
+    }));
+  }
 
   return (
     <div className="w-full">
@@ -97,9 +140,52 @@ export function TablesComponent({ dataType, dataArray }) {
             {headers.map((header, index) => (
               <th
                 key={index}
-                className="border-r-2 border-r-cyan-400 border-b-2 border-b-cyan-400 py-1 px-2 text-left"
+                className="border-r-2 border-r-cyan-400 border-b-2 border-b-cyan-400 py-1 px-2 text-left "
               >
-                {header}
+                <div className="flex flex-row">
+                  {header.label}{" "}
+                  {header.sortKey && (
+                    <div>
+                      <button
+                        type="button"
+                        className="px-1 cursor-pointer"
+                        onClick={() => onSort && onSort(header.sortKey)}
+                      >
+                        {sortConfig?.direction === "asc" ? (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-5 "
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3"
+                            />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </th>
             ))}
           </tr>
@@ -153,7 +239,7 @@ export function TablesComponent({ dataType, dataArray }) {
                     viewBox="0 0 24 24"
                     strokeWidth="1.5"
                     stroke="currentColor"
-                    class="size-6 m-2 flex "
+                    className="size-6 m-2 flex "
                   >
                     <path
                       strokeLinecap="round"
