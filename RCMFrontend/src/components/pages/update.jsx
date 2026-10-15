@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CommunicateBackend from "../communicateBackend";
 import { useEffect, useState } from "react";
 import { InputFieldComponent } from "../smallComponents/inputFieldComponent";
@@ -11,6 +11,7 @@ import { useDelete } from "../hooks/useDelete";
 function Update() {
   const { category, id } = useParams();
   const { deleteHandler } = useDelete();
+  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [sailsList, setSailsList] = useState([]);
@@ -220,7 +221,11 @@ function Update() {
   const handelDelete = async () => {
     setErrorMessage("");
     const result = await deleteHandler(category, id);
-    setErrorMessage(result.message);
+    if (result.success === false) {
+      return setErrorMessage(result.message);
+    }
+    setErrorMessage(result.message || "");
+    navigate(-1);
   };
 
   return (

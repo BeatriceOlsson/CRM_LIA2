@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { response } from 'express';
 import { companyIdDB, saveCompanyInDb, allCompanyName, companyData, companyOnID, saveOverCompany, deleteCompany } from '../service/companyDatahandeler.js';
 import logger from '../middleware/logger.middelware.js';
 import { verifyToken } from '../middleware/jwt.middelware.js';
@@ -7,10 +7,14 @@ const routes = express.Router();
 
 routes.post('/save', verifyToken, async (req, res) => {
     if(!req.body) {
-        return res.status(400).json({message: 'Saaknas infomation om företaget.'});
+        return res.status(400).json({message: 'Saknas infomation om företaget.'});
     }
 
     const {companyName, orgNr, adress} =req.body;
+
+    if(!companyName) {
+        return res.status(400).json({message: "Föetagsnamn saknas för att kunna gå vidare"})
+    }
 
     try {
         const companyExists = await companyIdDB(companyName);
@@ -43,7 +47,12 @@ routes.get('/allCompanyInfo', verifyToken, async (req,res) => {
 
         const companyLlist = await companyData();
 
-        res.status(200).json(companyLlist);
+        const clanData = companyLlist.map( company => ({
+            ...company,
+            companyName: company.companyName ?? "",
+        }))
+
+        res.status(200).json(clanData);
     } catch (error) {
         logger.error('Kunde inte hämta data om företag.');
         return res.status(400).json({ message: 'Fel uppstog vid hämtning.'});

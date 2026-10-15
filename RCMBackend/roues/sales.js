@@ -1,6 +1,6 @@
 import express from 'express'
 import { verifyToken } from '../middleware/jwt.middelware.js';
-import { deleteSales, getAllSales, salesOnID, saveASales, saveOverSales } from '../service/salesDataHandeler.js';
+import { deleteSales, getAllSales, groupSalesCP, salesOnID, saveASales, saveOverSales } from '../service/salesDataHandeler.js';
 
 const routes = express.Router();
 
@@ -9,7 +9,15 @@ routes.get('/sales', verifyToken, async (req,res) => {
     try {
         const dataSales = await getAllSales();
 
-        return res.status(200).json(dataSales);
+        const salesNoNull = dataSales.map(sales => ({
+            ...sales,
+            CPFirstName: sales.CPFirstName ?? "",
+            CPLastName: sales.CPLastName ?? "",
+            salesFirstName: sales.salesFirstName ?? "",
+            salesLastName: sales.salesLastName ?? ""
+        }))
+
+        return res.status(200).json(salesNoNull);
     } catch (error) {
         return res.status(400).json({ message: 'Kunde inte hämta alal försälningar: ', error});
     }
@@ -90,6 +98,17 @@ routes.post('/delete', verifyToken, async (req, res) => {
         return res.status(200).json({ message: 'Radering av försäljning är utförd.'})
     } catch (error) {
         return res.status(500).json({ message: 'Fel uppstog och försäljning kunde inte tas bort.'})
+    }
+})
+
+routes.get('/groupData', verifyToken, async (req, res) => {
+console.log('1');
+    try {
+        const groupData = await groupSalesCP();
+console.log('4', groupData);
+        res.status(200).json(groupData);
+    } catch (error) {
+        res.status(500).json({message: 'Kunde inte hämta data.'})
     }
 })
 

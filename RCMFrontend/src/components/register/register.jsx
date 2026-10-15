@@ -21,6 +21,24 @@ function RegisterUser({ isOpen, onClose }) {
       companyName: selectedCompany,
     };
 
+    if (!data.firstName || !data.lastName) {
+      return setErrorMessage(
+        "Namn på personen saknas för att kunna gå vidare.",
+      );
+    }
+
+    if (!data.email) {
+      return setErrorMessage("Email behövs för att kunna spara person.");
+    }
+
+    if (!data.password) {
+      return setErrorMessage("Lösenord saknas för att kunna gå vidare.");
+    }
+
+    if (!selectedCompany) {
+      return setErrorMessage("Valt företag saknas för att kunna spara person.");
+    }
+
     try {
       const response = await CommunicateBackend({
         url: "/contactPerson/register",
@@ -125,7 +143,7 @@ function RegisterUser({ isOpen, onClose }) {
                 />
               </div>
             </form>
-            <div className="absolute top-79">
+            <div className="absolute top-65">
               {errorMessage && <ErrorHandler error={errorMessage} />}
             </div>
             <RegisterCompany

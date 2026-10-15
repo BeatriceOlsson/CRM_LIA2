@@ -13,7 +13,13 @@ routes.get('/contactPerson', verifyToken, async (req, res) => {
     try {
         const response = await getAllUsers(); 
 
-        return res.status(200).json(response);
+        const clanData = response.map( contact => ({
+            ...contact,
+            firstName: contact.firstName ?? "",
+            lastName: contact.lastName ?? "",
+        }));
+
+        return res.status(200).json(clanData);
     } catch (error) {
         return res.status(400).json({ message: "Kunde inte hämta personer", error});
     }
@@ -63,6 +69,10 @@ routes.post('/register', verifyToken, async (req, res) => {
     }
 
     const {firstName, lastName, email, password, companyName} = req.body
+
+    if(!email || !password || ! companyName || !lastName || !firstName){
+        return res.status(400).json({ message: 'Datta saknas för att kunna gå vidare'})
+    }
 
     let mailCheck =/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if(!mailCheck.test(email)) {
@@ -127,7 +137,7 @@ routes.put('/update', verifyToken, async (req, res) => {
     companyID = companyID ? Number(companyID) : null;
 
     try {
-        const save = await saveOverContact(firstName, lastName, email, companyID, contactPersonID);
+        await saveOverContact(firstName, lastName, email, companyID, contactPersonID);
 
         res.status(200).json({ message: 'Ändringan updaterades.'})
     } catch (error) {
@@ -137,18 +147,18 @@ routes.put('/update', verifyToken, async (req, res) => {
 
 routes.post('/delete', verifyToken, async (req, res) => {
     const { contactPersonID } = req.body;
-console.log('1');
+
     if(!contactPersonID) return res.status(400).json({ message: 'Behöver ha vald användare för att kunna radera data.'})
     
     const personExist = await contactOnID(contactPersonID);
-console.log(personExist);
+
     if(!personExist || personExist === 0) {
         return res.status(400).json({ message: 'Användare fins inte i systemet.'})
     }
-console.log('2');
+
     const user = await getUsersID(contactPersonID);
     const userID = user && user.length > 0 ? user[0].userID : null;
-console.log(userID);
+
     try {
         await deletePerson(contactPersonID, userID);
 

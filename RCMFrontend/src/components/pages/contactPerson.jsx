@@ -14,13 +14,13 @@ function ContactPerson() {
   const [currentPage, setCurrentPage] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
   const [regesterPopUpp, setRegesterPopUpp] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [selectedFilter, setSelectedFilter] = useState({
     salesStatus: [],
     companyID: "",
     contactPersonID: "",
     userID: "",
   });
-
   useEffect(() => {
     const getAllUsers = async () => {
       setIsLoading(true);
@@ -81,6 +81,35 @@ function ContactPerson() {
     setCurrentPage((prev) => prev + 1);
   };
 
+  const handelDelete = (id) => {
+    setContactPerson((prev) =>
+      prev.filter((item) => {
+        return item.contactPersonID !== id;
+      }),
+    );
+  };
+
+  const handelSorting = (key) => {
+    const isAsc = sortConfig.key === key && sortConfig.direction === "asc";
+    const newDirection = isAsc ? "desc" : "asc";
+
+    const sorted = [...contactPerson].sort((a, b) => {
+      let valA = a[key] ?? "";
+      let valB = b[key] ?? "";
+
+      if (typeof valA === "number") {
+        return newDirection === "asc" ? valA - valB : valB - valA;
+      }
+
+      const compare = String(valA).localeCompare(String(valB), "sv");
+      return newDirection === "asc" ? compare : -compare;
+    });
+
+    setContactPerson(sorted);
+    setSortConfig({ key, direction: newDirection });
+    setCurrentPage(1);
+  };
+
   return (
     <div className="grid grid-cols-[1fr_5fr]">
       <div className="grid columns-1">
@@ -111,7 +140,13 @@ function ContactPerson() {
             <ErrorHandler error={errorMessage} />
           ) : contactPerson.length > 0 ? (
             <div>
-              <TablesComponent dataType={"CP"} dataArray={currentPerson} />
+              <TablesComponent
+                dataType={"CP"}
+                dataArray={currentPerson}
+                onDelete={handelDelete}
+                onSort={handelSorting}
+                sortConfig={sortConfig}
+              />
               <PriviesNextButton
                 previus={handelPrevius}
                 next={handelNext}

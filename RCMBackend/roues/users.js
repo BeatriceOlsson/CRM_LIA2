@@ -29,7 +29,13 @@ routes.post('/createUsers', async (req, res) => {
 routes.get('/userPersonList', async (req,res) => {
     const allUsers = await allUserNames();
 
-    return res.status(200).json(allUsers);
+    const clanData= allUsers.map( users => ({
+        ...users,
+        firstName: users.firstName ?? "",
+        lastName: users.lastName ?? "",
+    }))
+
+    return res.status(200).json(clanData);
 })
 
 routes.post('/delete', verifyToken, async ( req, res ) => {

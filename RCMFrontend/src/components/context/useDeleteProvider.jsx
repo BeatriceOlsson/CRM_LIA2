@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import { DeleteContext } from "./useDeleteContext";
 import CommunicateBackend from "../communicateBackend";
+import { Outlet } from "react-router-dom";
 
-export function DeleteProvider({ children }) {
+export function DeleteProvider() {
   const deleteHandler = useCallback(async (type, id) => {
     if (!type || !id)
       return {
@@ -60,6 +61,8 @@ export function DeleteProvider({ children }) {
     deleteHandler,
   };
   return (
-    <DeleteContext.Provider value={data}>{children}</DeleteContext.Provider>
+    <DeleteContext.Provider value={data}>
+      <Outlet />
+    </DeleteContext.Provider>
   );
 }
