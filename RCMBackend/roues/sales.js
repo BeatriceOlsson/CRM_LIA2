@@ -102,10 +102,10 @@ routes.post('/delete', verifyToken, async (req, res) => {
 })
 
 routes.get('/groupData', verifyToken, async (req, res) => {
-console.log('1');
+
     try {
         const groupData = await groupSalesCP();
-console.log('4', groupData);
+
         res.status(200).json(groupData);
     } catch (error) {
         res.status(500).json({message: 'Kunde inte hämta data.'})

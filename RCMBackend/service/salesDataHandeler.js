@@ -123,7 +123,7 @@ async function deleteSales( salesID ) {
 }
 
 async function groupSalesCP() {
-    console.log('2');
+
     try {
         const db = await DBConetion;
         const response = await db.request()
@@ -135,7 +135,7 @@ async function groupSalesCP() {
                 FROM sales s LEFT JOIN contactPerson cp ON s.contactPersonID = cp.contactPersonID
                 LEFT JOIN v_salesCalculationse vs ON s.salesID = vs.salesID
                 GROUP BY s.contactPersonID, cp.firstName , cp.lastName;`)
-console.log('3', response.recordset);
+
                 return response.recordset || [];
     } catch (error) {
         logger.error('Datta kunde inte hämtas');
